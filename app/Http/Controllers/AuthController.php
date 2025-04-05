@@ -30,10 +30,14 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+
         ]);
+        $user->createToken('Api Tocken of '.$user->name);
         Note::create(['content' => "Welcome, {$user->name}!"]);
         });
-        return response()->json(['tenant_id' => $tenant->id]);
+        return$this->Success(['tenant_id' => $tenant->id
+    
+     ]);
     }
     public function login(LoginRequest $request)
     {
