@@ -2,33 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Note;
-use App\Models\Tenant;
-use App\Treits\HttpResponses;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 
+use App\Http\Requests\NoteRequest;
+
+
+use App\Service\NoteService;
 class NoteController extends Controller
 {
-    use HttpResponses;
     
     public function index()
     {
-        $tenant = Tenant::find(Auth::user()->tenant_id);
-        return $tenant->run(function () {
-            $notes = Note::all();
-            return $this->Success($notes);
-        });
+        $Service=new NoteService;
+        return $Service->index();
     }
-
-    public function store(Request $request)
+    public function store(NoteRequest $Request)
     {
-        $tenant = Tenant::find(Auth::user()->tenant_id);
-        return  $tenant->run(function () use ($request) {
-            $note = Note::create([
-                'content' => $request->content,
-            ]);
-            return $this->Success($note);
-        });
+        $Service=new NoteService;
+        return $Service->store($Request);
+    }
+    public function update(NoteRequest $Request, $NoteId){
+        
+        $Service=new NoteService;
+        return $Service->update($Request, $NoteId);
+
     }
 }

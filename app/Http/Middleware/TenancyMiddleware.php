@@ -16,29 +16,26 @@ class TenancyMiddleware
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function __construct(
-        protected Tenancy $tenancy
+        protected Tenancy $Tenancy
     ) {}
 
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $Request, Closure $Next): Response
     {
-        $tenant = Tenant::find($request->user()->tenant_id);
-        // 1. get current user
-        // 2. get current tenant
-        // 3. check both of them if equal each other
-        if (! $request->user()) {
+        $Tenant = Tenant::find($Request->user()->tenant_id);
+        if (! $Request->user()) {
             abort(401, 'Unauthenticated');
         }
 
-        if (! $tenant) {
+        if (! $Tenant) {
             abort(404, 'Tenant not found');
         }
 
-        if (explode(":", $_SERVER['HTTP_HOST'])[0] != $tenant->domains->first()->domain) {
+        if (explode(":", $_SERVER['HTTP_HOST'])[0] != $Tenant->domains->first()->domain) {
             abort(401, 'Unauthenticated');
         }
 
-        $this->tenancy->initialize($tenant);
+        $this->Tenancy->initialize($Tenant);
 
-        return $next($request);
+        return $Next($Request);
     }
 }
