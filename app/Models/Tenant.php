@@ -13,4 +13,5 @@ class Tenant extends BaseTenant implements TenantWithDatabase
     protected $fillable = [
     
     ];
+    
 }
