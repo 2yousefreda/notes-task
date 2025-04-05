@@ -14,51 +14,61 @@ use Illuminate\Http\Request;
 use App\Treits\HttpResponses;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
+
 class AuthController extends Controller
 {
     use HttpResponses;
     public function register(RegisterRequest $request)
     {
         $tenant = Tenant::create([
-            "name"=> $request->name,
+            "name" => $request->name,
         ]);
+
         $tenant->createDomain([
             'domain' => $request->domain,
         ]);
-        $user=  User::create([
+
+        $user =  User::create([
             'name' => $request->name,
             'email' => $request->email,
             'tenant_id' => $tenant->id,
-            'password' => Hash::make($request->password),
+            'password' => $request->password,
 
         ]);
-       $tenant->run(function ()use ($user) {
-        $user->createToken('Api Tocken of '.$user->name);
-        Note::create(['content' => "Welcome, {$user->name}!"]);
+        $tenant->run(function () use ($user) {
+            $user->createToken('Api Tocken of ' . $user->name);
+            Note::create(['content' => "Welcome, {$user->name}!"]);
         });
-        return$this->Success(['tenant_id' => $tenant->id,
-        'user' => $user,
-        'Token' => $user->createToken('Api Tocken of '.$user->name)->plainTextToken
 
-     ]);
+        return $this->Success([
+            'tenant_id' => $tenant->id,
+            'user' => $user,
+            'Token' => $user->createToken('Api Tocken of ' . $user->name)->plainTextToken
+
+        ]);
     }
+
+
     public function login(LoginRequest $request)
     {
-       
-    
-        
-        if(!Auth::attempt($request->only('email','password'))){
-            return $this->Error('','Credentials does not match',401);
-        }
-        $user = User::where('email', $request->email)->first(); 
-        $tenant=Tenant::find($user->tenant_id);
-        tenancy()->initialize($tenant);
-        $token = $user->createToken('Api Tocken of '.$user->name)->plainTextToken;
-        return $this->Success([
-            'token'=>$token,
-            'user' => $user,
-            
-        ],'Login Success');
-    }
 
+
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return $this->Error('', 'Credentials does not match', 401);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        $tenant = Tenant::find($user->tenant_id);
+        
+        tenancy()->initialize($tenant);
+        
+        $token = $user->createToken('Api Tocken of ' . $user->name)->plainTextToken;
+
+        return $this->Success([
+            'token' => $token,
+            'user' => $user,
+
+        ], 'Login Success');
+    }
 }
