@@ -25,39 +25,39 @@ class AuthController extends Controller
         $tenant->createDomain([
             'domain' => $request->domain,
         ]);
-       $tenant->run(function ()use ($request) {
         $user=  User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'tenant_id' => $tenant->id,
             'password' => Hash::make($request->password),
 
         ]);
+       $tenant->run(function ()use ($user) {
         $user->createToken('Api Tocken of '.$user->name);
         Note::create(['content' => "Welcome, {$user->name}!"]);
         });
-        return$this->Success(['tenant_id' => $tenant->id
-    
+        return$this->Success(['tenant_id' => $tenant->id,
+        'user' => $user,
+        'Token' => $user->createToken('Api Tocken of '.$user->name)->plainTextToken
+
      ]);
     }
     public function login(LoginRequest $request)
     {
-        $tenant = tenancy()->tenant;
-
-        if (!$tenant) {
-            return response()->json(['message' => 'Tenant not identified'], 400);
-        }
+       
     
         
         if(!Auth::attempt($request->only('email','password'))){
             return $this->Error('','Credentials does not match',401);
         }
         $user = User::where('email', $request->email)->first(); 
-
+        $tenant=Tenant::find($user->tenant_id);
+        tenancy()->initialize($tenant);
         $token = $user->createToken('Api Tocken of '.$user->name)->plainTextToken;
         return $this->Success([
             'token'=>$token,
             'user' => $user,
-            'tenant' => $tenant->only(['id', 'name']),
+            
         ],'Login Success');
     }
 

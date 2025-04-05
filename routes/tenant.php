@@ -6,7 +6,8 @@ use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 use App\Http\Controllers\AuthController;
-
+use App\Models\Tenant;
+use App\Models\User;
 /*
 |--------------------------------------------------------------------------
 | Tenant Routes
@@ -20,8 +21,13 @@ use App\Http\Controllers\AuthController;
 */
 
 Route::middleware([
-    'api',
+    'web',
     InitializeTenancyByDomain::class,
     PreventAccessFromCentralDomains::class,
     ])->group(function () {
+
+        Route::get('/user', function () {
+            return User::all();
+        });
+       
 });
